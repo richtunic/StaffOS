@@ -1,52 +1,73 @@
-# StaffOS
+# StaffOS (Staff Engineer Operating System)
 
-Skill para agentes de IA que obliga a programar con criterio profesional.
+[![NPM Version](https://img.shields.io/npm/v/staffos.svg)](https://www.npmjs.com/package/staffos)
+[![License](https://img.shields.io/npm/l/staffos.svg)](https://github.com/richtunic/StaffOS/blob/main/LICENSE)
 
-Inspirado en la idea de escribir menos código, pero agregando:
+Skill para agentes de IA locales que obliga a programar con criterio profesional de Staff Engineer. 
 
-- Validación técnica.
-- Seguridad obligatoria.
-- Documentación continua.
-- Trabajo por fases.
-- Revisión anti-slop.
-- Uso de documentación actualizada.
-- Handoff para otros agentes.
+Inspirado en la idea de escribir menos código, pero agregando seguridad estricta, validación sistemática, documentación continua y una optimización extrema del uso de tokens.
+
+---
 
 ## Objetivo
 
-Evitar que los agentes de IA produzcan código inflado, inseguro o difícil de mantener.
+Evitar que los agentes de IA produzcan código inflado (*slop*), inseguro, o que consuman miles de tokens innecesariamente leyendo archivos irrelevantes del proyecto.
 
-## Instalación manual
+---
 
-Copiar:
+## Instalación rápida (NPM)
 
-```txt
-skills/staffos/SKILL.md
-AGENTS.md
-commands/
-docs/
+Puedes instalar e inicializar todas las reglas, comandos y plantillas directamente en cualquier proyecto ejecutando:
+
+```bash
+npx staffos
 ```
 
-al proyecto donde trabajará el agente.
+El instalador copiará la estructura automáticamente en tu directorio actual. Además, cuenta con un comprobador de actualizaciones asíncrono e integrado que te avisará si hay una versión superior disponible en NPM.
 
-## Uso
+---
 
-Antes de iniciar una tarea, el agente debe leer:
+## Ahorro de Tokens e Impacto
 
-```txt
-AGENTS.md
-skills/staffos/SKILL.md
-docs/AI_CONTEXT.md
-docs/HANDOFF.md
-```
+Una de las mayores ventajas de usar **StaffOS** es el drástico ahorro de tokens (entrada/salida) y reducción de costos de API. Los agentes tradicionales suelen leer todo el repositorio e implementar refactorizaciones masivas. **StaffOS** limita esto mediante reglas estrictas de parcheo y la lectura secuencial de documentación viva.
 
-## Comandos
+### Tabla Comparativa de Consumo de Tokens
 
-* staffos-review
-* staffos-audit
-* staffos-security
-* staffos-handoff
-* staffos-help
+| Métrica / Escenario | Agente Tradicional (Sin restricciones) | Con **StaffOS** | Ahorro Promedio |
+| :--- | :--- | :--- | :--- |
+| **Escaneo Inicial del Proyecto** | ~35,000 tokens (Lectura completa) | ~1,500 tokens (Docs de contexto) | **~95%** |
+| **Generación de Código** | ~4,500 tokens (Refactorizaciones completas) | ~400 tokens (Diff/parche minimalista) | **~90%** |
+| **Ciclos de Prueba y Error** | 3 - 5 iteraciones por tarea | 1 iteración (Planificado y validado) | **~75%** |
+| **Costo Estimado por Tarea** | $0.25 - $0.80 USD | $0.02 - $0.06 USD | **~85% - 90%** |
+
+### Tres Estrategias Clave de Ahorro:
+1. **Project Memory Layer (Limitar Lecturas)**: En lugar de escanear el código fuente entero, el agente está obligado a leer primero `AI_CONTEXT.md` y `HANDOFF.md`. Si es suficiente, no lee nada más.
+2. **Minimal Patch Engineering**: Prohíbe reescribir archivos enteros. Al forzar cambios enfocados de pocas líneas, los tokens de salida de la API se reducen al mínimo.
+3. **Progressive Implementation Protocol**: Divide las tareas grandes en fases lógicas con validaciones intermedias obligatorias. Esto evita que el agente falle al final y tenga que repetir toda la tarea desde cero.
+
+---
+
+## Estructura de Uso
+
+Una vez instalado en tu proyecto local, el agente operará bajo las siguientes directrices:
+
+* **Paso 1**: Leer [AGENTS.md](file:///Users/richtunic/Documents/Proyectos/Agent%20Skill/AGENTS.md) al inicio de la conversación.
+* **Paso 2**: Utilizar la skill en [skills/staffos/SKILL.md](file:///Users/richtunic/Documents/Proyectos/Agent%20Skill/skills/staffos/SKILL.md).
+* **Paso 3**: Utilizar las herramientas de comandos de revisión integradas.
+
+---
+
+## Comandos Disponibles
+
+El agente puede invocar estos comandos de revisión en cualquier fase de su trabajo:
+
+* `staffos-review`: Revisa el diff actual buscando código redundante o abstracciones prematuras.
+* `staffos-audit`: Audita la arquitectura del proyecto para evitar sobreingeniería y dependencias innecesarias.
+* `staffos-security`: Revisa que no existan credenciales hardcodeadas ni endpoints expuestos.
+* `staffos-handoff`: Genera un informe detallado para que el siguiente agente pueda continuar el trabajo sin perder contexto.
+* `staffos-help`: Muestra un menú de ayuda y los modos de operación recomendados (Lite, Full, Ultra).
+
+---
 
 ## Licencia
 

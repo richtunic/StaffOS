@@ -7,6 +7,11 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.join(__dirname, '..');
 
+// Get current version from package.json
+const packageJsonPath = path.join(packageRoot, 'package.json');
+const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+const currentVersion = pkg.version;
+
 // Files and folders to copy to the user's local project
 const itemsToCopy = [
   { src: 'AGENTS.md', dest: 'AGENTS.md' },
@@ -17,7 +22,7 @@ const itemsToCopy = [
 
 const targetDir = process.cwd();
 
-console.log('Installing StaffOS in:', targetDir);
+console.log(`Installing StaffOS v${currentVersion} in:`, targetDir);
 
 function copyRecursiveSync(src, dest) {
   const exists = fs.existsSync(src);
@@ -40,17 +45,42 @@ function copyRecursiveSync(src, dest) {
   }
 }
 
-try {
-  for (const item of itemsToCopy) {
-    const srcPath = path.join(packageRoot, item.src);
-    const destPath = path.join(targetDir, item.dest);
-    if (fs.existsSync(srcPath)) {
-      copyRecursiveSync(srcPath, destPath);
+async function checkForUpdates() {
+  try {
+    const res = await fetch('https://registry.npmjs.org/staffos/latest', {
+      signal: AbortSignal.timeout(2000)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.version && data.version !== currentVersion) {
+        console.log('\n==================================================');
+        console.log(`📢  A new version of StaffOS is available: ${data.version} (current: ${currentVersion})`);
+        console.log("👉  Run 'npx staffos@latest' to update.");
+        console.log('==================================================\n');
+      }
     }
+  } catch (error) {
+    // Fail silently so it doesn't break the offline/slow network installations
   }
-  console.log('\nStaffOS installed successfully! 🎉');
-  console.log('Ask your AI Agent to read AGENTS.md to begin.');
-} catch (error) {
-  console.error('Error installing StaffOS:', error.message);
-  process.exit(1);
 }
+
+async function main() {
+  try {
+    for (const item of itemsToCopy) {
+      const srcPath = path.join(packageRoot, item.src);
+      const destPath = path.join(targetDir, item.dest);
+      if (fs.existsSync(srcPath)) {
+        copyRecursiveSync(srcPath, destPath);
+      }
+    }
+    console.log('\nStaffOS installed successfully! 🎉');
+    console.log('Ask your AI Agent to read AGENTS.md to begin.');
+    
+    await checkForUpdates();
+  } catch (error) {
+    console.error('Error installing StaffOS:', error.message);
+    process.exit(1);
+  }
+}
+
+main();
