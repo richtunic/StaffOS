@@ -16,7 +16,9 @@ const currentVersion = pkg.version;
 const itemsToCopy = [
   { src: 'AGENTS.md', dest: 'AGENTS.md' },
   { src: 'skills/staffos/SKILL.md', dest: 'skills/staffos/SKILL.md' },
+  { src: 'skills/staffos/SKILL.md', dest: '.opencode/skills/staffos/SKILL.md' },
   { src: 'commands', dest: 'commands' },
+  { src: 'commands', dest: '.opencode/commands' },
   { src: 'docs', dest: 'docs' }
 ];
 
