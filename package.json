@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "StaffOS: Staff Engineer Operating System for AI coding agents",
   "type": "module",
+  "bin": {
+    "staffos": "./bin/cli.js"
+  },
   "scripts": {
     "test": "node tests/rule-consistency.test.js"
   },
