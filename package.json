@@ -1,0 +1,10 @@
+{
+  "name": "staffos",
+  "version": "0.1.0",
+  "description": "StaffOS: Staff Engineer Operating System for AI coding agents",
+  "type": "module",
+  "scripts": {
+    "test": "node tests/rule-consistency.test.js"
+  },
+  "license": "MIT"
+}
