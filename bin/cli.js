@@ -133,26 +133,26 @@ const modelsPricing = {
 
 // Auto-detect the active AI environment
 function detectActiveAI() {
-  // Heuristic 1: Env Var flags (Explicit platform setups)
-  if (process.env.ANTIGRAVITY === 'true' || process.env.ANTIGRAVITY_VERSION) {
-    return { key: 'gemini-flash', reason: 'detección de entorno Antigravity 2.0' };
+  // Heuristic 1: Active Runtime Environment Variables (HIGHEST PRIORITY)
+  if (process.env.ANTIGRAVITY_AGENT === '1' || process.env.ANTIGRAVITY_PROJECT_ID) {
+    return { key: 'gemini-flash', reason: 'ejecutando en entorno Antigravity 2.0' };
   }
   if (process.env.CODEX === 'true' || process.env.CODEX_AGENT) {
-    return { key: 'gpt-5.5', reason: 'detección de entorno OpenAI Codex' };
+    return { key: 'gpt-5.5', reason: 'ejecutando en entorno OpenAI Codex' };
   }
   if (process.env.OPENCODE === 'true') {
-    return { key: 'gemini-pro', reason: 'detección de entorno OpenCode' };
+    return { key: 'gemini-pro', reason: 'ejecutando en entorno OpenCode' };
   }
 
-  // Heuristic 2: Directory structures
-  if (fs.existsSync(path.join(targetDir, '.opencode')) || fs.existsSync(path.join(targetDir, 'opencode.json')) || fs.existsSync(path.join(targetDir, 'opencode.jsonc'))) {
-    return { key: 'gemini-pro', reason: 'configuración de OpenCode detectada (.opencode)' };
+  // Heuristic 2: Directory structures (Fallback if no env var is present)
+  if (fs.existsSync(path.join(targetDir, '.gemini')) || fs.existsSync(path.join(targetDir, 'adapters/antigravity'))) {
+    return { key: 'gemini-flash', reason: 'directorio de integración de Antigravity 2.0 detectado' };
   }
   if (fs.existsSync(path.join(targetDir, 'adapters/codex')) || fs.existsSync(path.join(targetDir, 'codex.json'))) {
-    return { key: 'gpt-5.5', reason: 'configuración de Codex detectada (adapters/codex)' };
+    return { key: 'gpt-5.5', reason: 'directorio de integración de Codex detectado' };
   }
-  if (fs.existsSync(path.join(targetDir, '.gemini')) || fs.existsSync(path.join(targetDir, 'adapters/antigravity'))) {
-    return { key: 'gemini-flash', reason: 'configuración de Antigravity 2.0 detectada (.gemini)' };
+  if (fs.existsSync(path.join(targetDir, '.opencode')) || fs.existsSync(path.join(targetDir, 'opencode.json')) || fs.existsSync(path.join(targetDir, 'opencode.jsonc'))) {
+    return { key: 'gemini-pro', reason: 'directorio de integración de OpenCode detectado' };
   }
   if (fs.existsSync(path.join(targetDir, '.claudecode'))) {
     return { key: 'claude-sonnet', reason: 'directorio .claudecode detectado' };

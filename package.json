@@ -1,6 +1,6 @@
 {
   "name": "staffos",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "StaffOS: Staff Engineer Operating System for AI coding agents",
   "type": "module",
   "bin": "bin/cli.js",
