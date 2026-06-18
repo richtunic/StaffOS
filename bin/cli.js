@@ -121,10 +121,36 @@ function getFilesRecursive(dir, fileList = []) {
   return fileList;
 }
 
+// Model Pricing Registry (2026 Standard Rates per 1M tokens)
+const modelsPricing = {
+  'claude-sonnet': { name: 'Claude 4.8 Sonnet', input: 3.00, output: 15.00 },
+  'claude-opus': { name: 'Claude 4.8 Opus', input: 15.00, output: 75.00 },
+  'gemini-pro': { name: 'Gemini 3.1 Pro', input: 2.00, output: 12.00 },
+  'gemini-flash': { name: 'Gemini 3.5 Flash', input: 0.075, output: 0.30 },
+  'gpt-5.5': { name: 'GPT 5.5', input: 5.00, output: 30.00 },
+  'local': { name: 'Modelos Locales (Ollama/DeepSeek)', input: 0.00, output: 0.00 }
+};
+
+function getModelFromArgs() {
+  const modelArg = process.argv.find(arg => arg.startsWith('--model='));
+  if (modelArg) {
+    return modelArg.split('=')[1].toLowerCase();
+  }
+  const modelIndex = process.argv.indexOf('-m');
+  if (modelIndex !== -1 && process.argv[modelIndex + 1]) {
+    return process.argv[modelIndex + 1].toLowerCase();
+  }
+  return 'claude-sonnet'; // default
+}
+
 // Estimate token savings for the current workspace
 function runEstimator() {
+  const modelKey = getModelFromArgs();
+  const pricing = modelsPricing[modelKey] || modelsPricing['claude-sonnet'];
+
   console.log(`${colors.cyan}${colors.bold}=== StaffOS Token & Cost Estimator ===${colors.reset}\n`);
   console.log(`Scanning workspace at: ${colors.gray}${targetDir}${colors.reset}`);
+  console.log(`Target AI Model: ${colors.yellow}${colors.bold}${pricing.name}${colors.reset} (Input: $${pricing.input}/1M, Output: $${pricing.output}/1M)`);
   
   const files = getFilesRecursive(targetDir);
   let totalCharacters = 0;
@@ -145,21 +171,14 @@ function runEstimator() {
   const codebaseTokens = Math.round(totalCharacters / 3.8);
 
   // Scenario A: Traditional Agent (Unconstrained)
-  // - Performs a full repository scan to start.
-  // - Runs 4 iterative repair cycles, re-reading context.
-  // - Rewrites complete files (avg. 1,500 tokens output) on each cycle.
   const tradInputTokens = codebaseTokens * 4;
   const tradOutputTokens = 1500 * 4;
   
-  // Pricing model: Claude 3.5 Sonnet / Gemini 1.5 Pro standard rates
-  // Input: $3.00 / 1M tokens. Output: $15.00 / 1M tokens.
-  const tradInputCost = (tradInputTokens / 1_000_000) * 3.00;
-  const tradOutputCost = (tradOutputTokens / 1_000_000) * 15.00;
+  const tradInputCost = (tradInputTokens / 1_000_000) * pricing.input;
+  const tradOutputCost = (tradOutputTokens / 1_000_000) * pricing.output;
   const tradTotalCost = tradInputCost + tradOutputCost;
 
   // Scenario B: StaffOS Agent
-  // - Reads AI_CONTEXT.md + AGENTS.md + SKILL.md.
-  // - If they exist, read actual length. If not, default to 1,500 tokens baseline.
   let staffOsContextLength = 0;
   const docsToCheck = [
     path.join(targetDir, 'AGENTS.md'),
@@ -182,11 +201,10 @@ function runEstimator() {
     ? Math.round(staffOsContextLength / 3.8) 
     : 1500; // default baseline
 
-  // StaffOS restricts changes to minimal patches (avg. 100 tokens output per task) over 1 cycle
   const staffOsOutputTokens = 100;
 
-  const staffOsInputCost = (staffOsInputTokens / 1_000_000) * 3.00;
-  const staffOsOutputCost = (staffOsOutputTokens / 1_000_000) * 15.00;
+  const staffOsInputCost = (staffOsInputTokens / 1_000_000) * pricing.input;
+  const staffOsOutputCost = (staffOsOutputTokens / 1_000_000) * pricing.output;
   const staffOsTotalCost = staffOsInputCost + staffOsOutputCost;
 
   // Savings
@@ -209,8 +227,11 @@ function runEstimator() {
   console.log(`${colors.bold}${'COSTO TOTAL ESTIMADO / TAREA'.padEnd(28)} | $${tradTotalCost.toFixed(4).padEnd(19)} | $${staffOsTotalCost.toFixed(4).padEnd(13)} | ${colors.green}${savingsPercent.toFixed(1)}%${colors.reset}`);
   console.log('--------------------------------------------------------------------------------');
   
-  console.log(`\n${colors.green}${colors.bold}🎉  Ahorro Estimado: ~${savingsPercent.toFixed(0)}% en costos de API por tarea.${colors.reset}`);
-  console.log(`${colors.gray}* Calculado asumiendo $3.00/1M tokens entrada y $15.00/1M tokens salida (tipo Claude 3.5 Sonnet / Gemini 1.5 Pro).${colors.reset}\n`);
+  if (pricing.input === 0) {
+    console.log(`\n${colors.green}${colors.bold}🎉  Ahorro Estimado: ~${savingsPercent.toFixed(0)}% en tokens por tarea (ejecución local gratuita).${colors.reset}\n`);
+  } else {
+    console.log(`\n${colors.green}${colors.bold}🎉  Ahorro Estimado: ~${savingsPercent.toFixed(0)}% en costos de API por tarea.${colors.reset}\n`);
+  }
 }
 
 // Help command
@@ -218,8 +239,13 @@ function runHelp() {
   console.log(`\n${colors.cyan}${colors.bold}StaffOS CLI v${currentVersion}${colors.reset}`);
   console.log('Uso:');
   console.log(`  ${colors.bold}npx staffos${colors.reset}           - Instala e inicializa StaffOS en el proyecto actual.`);
-  console.log(`  ${colors.bold}npx staffos estimate${colors.reset}  - Escanea el proyecto actual y calcula el ahorro estimado de tokens.`);
+  console.log(`  ${colors.bold}npx staffos estimate${colors.reset}  - Escanea el proyecto y calcula los ahorros usando el modelo predeterminado.`);
+  console.log(`  ${colors.bold}npx staffos estimate --model=<tipo>${colors.reset} - Estima usando un modelo de IA específico.`);
   console.log(`  ${colors.bold}npx staffos help${colors.reset}      - Muestra este menú de ayuda.`);
+  console.log('\nModelos de IA soportados para estimación (`--model=`):');
+  Object.keys(modelsPricing).forEach(key => {
+    console.log(`  - ${colors.yellow}${key.padEnd(15)}${colors.reset} : ${modelsPricing[key].name}`);
+  });
   console.log();
 }
 

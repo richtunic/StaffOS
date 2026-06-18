@@ -31,6 +31,20 @@ Para **analizar y estimar el ahorro exacto de tokens** y el costo proyectado de 
 npx staffos estimate
 ```
 
+Puedes especificar un modelo de IA en particular mediante el flag `--model` para obtener estimaciones de costos exactas basadas en las tarifas de 2026:
+
+```bash
+npx staffos estimate --model=gemini-pro
+```
+
+Los modelos de IA soportados son:
+* `claude-sonnet` (Claude 4.8 Sonnet - predeterminado)
+* `claude-opus` (Claude 4.8 Opus)
+* `gemini-pro` (Gemini 3.1 Pro)
+* `gemini-flash` (Gemini 3.5 Flash)
+* `gpt-5.5` (GPT 5.5)
+* `local` (Modelos locales de Ollama/Llama sin costo de API)
+
 Este comando escaneará la base de código de tu proyecto local y generará una tabla detallada con los cálculos en tiempo real.
 
 ---
