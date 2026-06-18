@@ -25,6 +25,14 @@ npx staffos
 
 El instalador copiará la estructura automáticamente en tu directorio actual. Además, cuenta con un comprobador de actualizaciones asíncrono e integrado que te avisará si hay una versión superior disponible en NPM.
 
+Para **analizar y estimar el ahorro exacto de tokens** y el costo proyectado de tu proyecto actual, ejecuta:
+
+```bash
+npx staffos estimate
+```
+
+Este comando escaneará la base de código de tu proyecto local y generará una tabla detallada con los cálculos en tiempo real.
+
 ---
 
 ## Ahorro de Tokens e Impacto
