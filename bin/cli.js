@@ -131,26 +131,66 @@ const modelsPricing = {
   'local': { name: 'Modelos Locales (Ollama/DeepSeek)', input: 0.00, output: 0.00 }
 };
 
-function getModelFromArgs() {
+// Auto-detect the active AI environment
+function detectActiveAI() {
+  // 1. Directory heuristics
+  if (fs.existsSync(path.join(targetDir, '.claudecode'))) {
+    return { key: 'claude-sonnet', reason: 'directorio .claudecode detectado' };
+  }
+  if (fs.existsSync(path.join(targetDir, '.opencode'))) {
+    return { key: 'gemini-pro', reason: 'directorio .opencode detectado' };
+  }
+  if (fs.existsSync(path.join(targetDir, '.cursorrules'))) {
+    if (process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+      return { key: 'gpt-5.5', reason: 'archivo .cursorrules y OPENAI_API_KEY detectados' };
+    }
+    return { key: 'claude-sonnet', reason: 'archivo .cursorrules detectado (Cursor default)' };
+  }
+
+  // 2. Env Var heuristics
+  if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
+    return { key: 'gemini-pro', reason: 'variable de entorno GEMINI_API_KEY / GOOGLE_API_KEY' };
+  }
+  if (process.env.ANTHROPIC_API_KEY) {
+    return { key: 'claude-sonnet', reason: 'variable de entorno ANTHROPIC_API_KEY' };
+  }
+  if (process.env.OPENAI_API_KEY) {
+    return { key: 'gpt-5.5', reason: 'variable de entorno OPENAI_API_KEY' };
+  }
+
+  // 3. Process/Terminal heuristics
+  if (process.env.TERM_PROGRAM === 'vscode') {
+    return { key: 'claude-sonnet', reason: 'ejecutado bajo Cursor/VSCode' };
+  }
+
+  return { key: 'claude-sonnet', reason: 'predeterminado por defecto' };
+}
+
+function getModelSelection() {
   const modelArg = process.argv.find(arg => arg.startsWith('--model='));
   if (modelArg) {
-    return modelArg.split('=')[1].toLowerCase();
+    const key = modelArg.split('=')[1].toLowerCase();
+    return { key, reason: 'parámetro --model especificado' };
   }
   const modelIndex = process.argv.indexOf('-m');
   if (modelIndex !== -1 && process.argv[modelIndex + 1]) {
-    return process.argv[modelIndex + 1].toLowerCase();
+    const key = process.argv[modelIndex + 1].toLowerCase();
+    return { key, reason: 'parámetro -m especificado' };
   }
-  return 'claude-sonnet'; // default
+  
+  // Run auto-detection
+  return detectActiveAI();
 }
 
 // Estimate token savings for the current workspace
 function runEstimator() {
-  const modelKey = getModelFromArgs();
-  const pricing = modelsPricing[modelKey] || modelsPricing['claude-sonnet'];
+  const selection = getModelSelection();
+  const pricing = modelsPricing[selection.key] || modelsPricing['claude-sonnet'];
 
   console.log(`${colors.cyan}${colors.bold}=== StaffOS Token & Cost Estimator ===${colors.reset}\n`);
   console.log(`Scanning workspace at: ${colors.gray}${targetDir}${colors.reset}`);
   console.log(`Target AI Model: ${colors.yellow}${colors.bold}${pricing.name}${colors.reset} (Input: $${pricing.input}/1M, Output: $${pricing.output}/1M)`);
+  console.log(`Detección de IA: ${colors.gray}${selection.reason}${colors.reset}`);
   
   const files = getFilesRecursive(targetDir);
   let totalCharacters = 0;
@@ -167,7 +207,6 @@ function runEstimator() {
   }
 
   // Token math modeling
-  // 1 token approx 3.8 characters in code
   const codebaseTokens = Math.round(totalCharacters / 3.8);
 
   // Scenario A: Traditional Agent (Unconstrained)
@@ -239,8 +278,8 @@ function runHelp() {
   console.log(`\n${colors.cyan}${colors.bold}StaffOS CLI v${currentVersion}${colors.reset}`);
   console.log('Uso:');
   console.log(`  ${colors.bold}npx staffos${colors.reset}           - Instala e inicializa StaffOS en el proyecto actual.`);
-  console.log(`  ${colors.bold}npx staffos estimate${colors.reset}  - Escanea el proyecto y calcula los ahorros usando el modelo predeterminado.`);
-  console.log(`  ${colors.bold}npx staffos estimate --model=<tipo>${colors.reset} - Estima usando un modelo de IA específico.`);
+  console.log(`  ${colors.bold}npx staffos estimate${colors.reset}  - Escanea el proyecto y auto-detecta tu IA activa para estimar costos.`);
+  console.log(`  ${colors.bold}npx staffos estimate --model=<tipo>${colors.reset} - Fuerza la estimación usando un modelo específico.`);
   console.log(`  ${colors.bold}npx staffos help${colors.reset}      - Muestra este menú de ayuda.`);
   console.log('\nModelos de IA soportados para estimación (`--model=`):');
   Object.keys(modelsPricing).forEach(key => {
