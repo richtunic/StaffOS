@@ -125,20 +125,37 @@ function getFilesRecursive(dir, fileList = []) {
 const modelsPricing = {
   'claude-sonnet': { name: 'Claude 4.8 Sonnet', input: 3.00, output: 15.00 },
   'claude-opus': { name: 'Claude 4.8 Opus', input: 15.00, output: 75.00 },
-  'gemini-pro': { name: 'Gemini 3.1 Pro', input: 2.00, output: 12.00 },
-  'gemini-flash': { name: 'Gemini 3.5 Flash', input: 0.075, output: 0.30 },
-  'gpt-5.5': { name: 'GPT 5.5', input: 5.00, output: 30.00 },
+  'gemini-pro': { name: 'Gemini 3.1 Pro (OpenCode)', input: 2.00, output: 12.00 },
+  'gemini-flash': { name: 'Gemini 3.5 Flash (Antigravity 2.0)', input: 0.075, output: 0.30 },
+  'gpt-5.5': { name: 'GPT 5.5 (Codex)', input: 5.00, output: 30.00 },
   'local': { name: 'Modelos Locales (Ollama/DeepSeek)', input: 0.00, output: 0.00 }
 };
 
 // Auto-detect the active AI environment
 function detectActiveAI() {
-  // 1. Directory heuristics
+  // Heuristic 1: Env Var flags (Explicit platform setups)
+  if (process.env.ANTIGRAVITY === 'true' || process.env.ANTIGRAVITY_VERSION) {
+    return { key: 'gemini-flash', reason: 'detección de entorno Antigravity 2.0' };
+  }
+  if (process.env.CODEX === 'true' || process.env.CODEX_AGENT) {
+    return { key: 'gpt-5.5', reason: 'detección de entorno OpenAI Codex' };
+  }
+  if (process.env.OPENCODE === 'true') {
+    return { key: 'gemini-pro', reason: 'detección de entorno OpenCode' };
+  }
+
+  // Heuristic 2: Directory structures
+  if (fs.existsSync(path.join(targetDir, '.opencode')) || fs.existsSync(path.join(targetDir, 'opencode.json')) || fs.existsSync(path.join(targetDir, 'opencode.jsonc'))) {
+    return { key: 'gemini-pro', reason: 'configuración de OpenCode detectada (.opencode)' };
+  }
+  if (fs.existsSync(path.join(targetDir, 'adapters/codex')) || fs.existsSync(path.join(targetDir, 'codex.json'))) {
+    return { key: 'gpt-5.5', reason: 'configuración de Codex detectada (adapters/codex)' };
+  }
+  if (fs.existsSync(path.join(targetDir, '.gemini')) || fs.existsSync(path.join(targetDir, 'adapters/antigravity'))) {
+    return { key: 'gemini-flash', reason: 'configuración de Antigravity 2.0 detectada (.gemini)' };
+  }
   if (fs.existsSync(path.join(targetDir, '.claudecode'))) {
     return { key: 'claude-sonnet', reason: 'directorio .claudecode detectado' };
-  }
-  if (fs.existsSync(path.join(targetDir, '.opencode'))) {
-    return { key: 'gemini-pro', reason: 'directorio .opencode detectado' };
   }
   if (fs.existsSync(path.join(targetDir, '.cursorrules'))) {
     if (process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
@@ -147,7 +164,7 @@ function detectActiveAI() {
     return { key: 'claude-sonnet', reason: 'archivo .cursorrules detectado (Cursor default)' };
   }
 
-  // 2. Env Var heuristics
+  // Heuristic 3: Env Var keys
   if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
     return { key: 'gemini-pro', reason: 'variable de entorno GEMINI_API_KEY / GOOGLE_API_KEY' };
   }
@@ -158,7 +175,7 @@ function detectActiveAI() {
     return { key: 'gpt-5.5', reason: 'variable de entorno OPENAI_API_KEY' };
   }
 
-  // 3. Process/Terminal heuristics
+  // Heuristic 4: Terminal program
   if (process.env.TERM_PROGRAM === 'vscode') {
     return { key: 'claude-sonnet', reason: 'ejecutado bajo Cursor/VSCode' };
   }
