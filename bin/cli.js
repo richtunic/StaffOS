@@ -123,17 +123,59 @@ function getFilesRecursive(dir, fileList = []) {
 
 // Model Pricing Registry (2026 Standard Rates per 1M tokens)
 const modelsPricing = {
-  'claude-sonnet': { name: 'Claude 4.8 Sonnet', input: 3.00, output: 15.00 },
-  'claude-opus': { name: 'Claude 4.8 Opus', input: 15.00, output: 75.00 },
+  'claude-sonnet': { name: 'Claude 4.8 / 4.6 Sonnet', input: 3.00, output: 15.00 },
+  'claude-opus': { name: 'Claude 4.8 / 4.7 Opus', input: 15.00, output: 75.00 },
   'gemini-pro': { name: 'Gemini 3.1 Pro (OpenCode)', input: 2.00, output: 12.00 },
   'gemini-flash': { name: 'Gemini 3.5 Flash (Antigravity 2.0)', input: 0.075, output: 0.30 },
-  'gpt-5.5': { name: 'GPT 5.5 (Codex)', input: 5.00, output: 30.00 },
+  'gpt-5.5': { name: 'GPT 5.5 / 5.4 (Codex)', input: 5.00, output: 30.00 },
   'local': { name: 'Modelos Locales (Ollama/DeepSeek)', input: 0.00, output: 0.00 }
 };
 
+// Parse active configuration files
+function detectModelFromConfigFile() {
+  // 1. Check staffos.json config override
+  const staffosPath = path.join(targetDir, 'staffos.json');
+  if (fs.existsSync(staffosPath)) {
+    try {
+      const config = JSON.parse(fs.readFileSync(staffosPath, 'utf8'));
+      if (config.model) {
+        const m = config.model.toLowerCase();
+        if (modelsPricing[m]) {
+          return { key: m, reason: 'configuración de staffos.json especificada' };
+        }
+      }
+    } catch (e) {}
+  }
+  
+  // 2. Check opencode.json config settings
+  const opencodePath = path.join(targetDir, 'opencode.json');
+  if (fs.existsSync(opencodePath)) {
+    try {
+      const config = JSON.parse(fs.readFileSync(opencodePath, 'utf8'));
+      const model = config.model || (config.agent && config.agent.model);
+      if (model && typeof model === 'string') {
+        const m = model.toLowerCase();
+        if (m.includes('gemini-3.1-pro') || m.includes('gemini-pro')) return { key: 'gemini-pro', reason: 'detectado en opencode.json' };
+        if (m.includes('gemini-3.5-flash') || m.includes('gemini-flash')) return { key: 'gemini-flash', reason: 'detectado en opencode.json' };
+        if (m.includes('gpt-5') || m.includes('gpt-5.4') || m.includes('gpt-5.5')) return { key: 'gpt-5.5', reason: 'detectado en opencode.json' };
+        if (m.includes('claude-4.6') || m.includes('claude-4.8') || m.includes('sonnet')) return { key: 'claude-sonnet', reason: 'detectado en opencode.json' };
+        if (m.includes('opus')) return { key: 'claude-opus', reason: 'detectado en opencode.json' };
+      }
+    } catch (e) {}
+  }
+  
+  return null;
+}
+
 // Auto-detect the active AI environment
 function detectActiveAI() {
-  // Heuristic 1: Active Runtime Environment Variables (HIGHEST PRIORITY)
+  // Check config files first (since they explicitly override workspace defaults)
+  const fileConfig = detectModelFromConfigFile();
+  if (fileConfig) {
+    return fileConfig;
+  }
+
+  // Heuristic 1: Active Runtime Environment Variables (High Priority)
   if (process.env.ANTIGRAVITY_AGENT === '1' || process.env.ANTIGRAVITY_PROJECT_ID) {
     return { key: 'gemini-flash', reason: 'ejecutando en entorno Antigravity 2.0' };
   }
