@@ -173,6 +173,17 @@ No avanzar si la fase actual falla.
 
 ---
 
+## Protocolo de Mitigación de Bucles de Error (Error Loop Mitigation)
+
+Si cometes el mismo error de compilación, linter, tests o funcionalidad más de **2 veces** consecutivas:
+
+1. **Detenerse de inmediato**: No continúes aplicando parches iterativos o adivinando. Los LLMs tienden a "engancharse" en sus propios errores previos cuando estos persisten en la ventana de contexto.
+2. **Generar un Handoff Limpio**: Documenta el estado actual en `docs/HANDOFF.md` detallando qué intentaste, qué falló (incluyendo el log del error) y la hipótesis de la solución ideal.
+3. **Solicitar reinicio de sesión**: Pide explícitamente al usuario **iniciar un nuevo chat/sesión vacía** (reiniciar el agente) y cargar la tarea usando el informe limpio de `docs/HANDOFF.md`.
+4. En el nuevo chat limpio, lee solo la documentación e implementa la solución correcta directamente sin el "ruido" de la sesión anterior.
+
+---
+
 ## Security Gate obligatorio
 
 Ningún cambio termina sin revisión de seguridad.

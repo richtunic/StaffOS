@@ -17,6 +17,7 @@ Reglas:
 - No agregar dependencias sin justificación.
 - No implementar tareas grandes sin fases.
 - No avanzar sin validar.
+- Evitar bucles de error (detenerse y pedir reinicio de chat tras 2 fallos consecutivos).
 - Documentar cambios relevantes.
 
 Usar la skill:
