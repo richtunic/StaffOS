@@ -36,7 +36,7 @@ npx staffos estimate
 Puedes especificar un modelo de IA en particular mediante el flag `--model`:
 
 ```bash
-npx staffos estimate --model=gemini-flash
+npx staffos estimate --model=gemini-neon
 ```
 
 ---
@@ -54,14 +54,20 @@ StaffOS está diseñado para funcionar de forma nativa e intercambiable entre:
 
 ### Modelos de IA soportados para estimación (`--model=`)
 
-| Flag `--model=` | Modelos compatibles | Entorno principal |
-| :--- | :--- | :--- |
-| `claude-sonnet` | **Claude 4.8 / 4.6 Sonnet** *(predeterminado)* | Claude Code / Cursor |
-| `claude-opus` | **Claude 4.8 / 4.7 Opus** | Claude Code / Cursor |
-| `gemini-flash` | **Gemini 3.5 Flash** | Antigravity 2.0 |
-| `gemini-pro` | **Gemini 3.1 Pro** | OpenCode / Antigravity |
-| `gpt-5.5` | **GPT-5.5 / GPT-5.4** | OpenAI Codex |
-| `local` | **Modelos locales (Ollama / DeepSeek / Llama)** | Local (sin costo de API) |
+Tarifas de referencia por 1M de tokens (Input / Output):
+
+| Flag `--model=` | Modelo | Input / Output (1M) | Entorno principal |
+| :--- | :--- | :---: | :--- |
+| `claude-sonnet` | **Claude 5.5 Sonnet** *(predeterminado)* | $2.00 / $10.00 | Claude Code / Cursor |
+| `claude-opus` | **Claude 5.5 Opus** | $4.00 / $20.00 | Claude Code / Cursor |
+| `claude-haiku` | **Claude 5.5 Haiku** | $0.10 / $0.50 | Claude Code / API |
+| `gemini-hydrogen` | **Gemini 4 Hydrogen** | $1.50 / $7.50 | Antigravity / OpenCode |
+| `gemini-neon` | **Gemini 4 Neon** | $3.00 / $15.00 | Antigravity 2.0 |
+| `gemini-argon` | **Gemini 4 Argon / Carbon** | $4.00 / $20.00 | Antigravity / Deep Reasoning |
+| `gpt-6-sol` | **GPT-6.2 Sol** | $2.00 / $10.00 | OpenAI Codex |
+| `gpt-6-astra` | **GPT-6.2 Astra** | $8.00 / $40.00 | OpenAI Codex / Flagship |
+| `gpt-6-terra` | **GPT-6.1 Terra** | $1.00 / $5.00 | OpenAI API |
+| `local` | **Modelos locales (Ollama / DeepSeek / Llama)** | $0.00 / $0.00 | Local (sin costo de API) |
 
 ---
 

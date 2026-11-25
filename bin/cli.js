@@ -129,15 +129,31 @@ function getFilesRecursive(dir, fileList = []) {
   return fileList;
 }
 
-// Model Pricing Registry (2026 Standard Rates per 1M tokens)
+// Model Pricing Registry (Late 2026 Verified Rates per 1M tokens)
 const modelsPricing = {
-  'claude-sonnet': { name: 'Claude 4.8 / 4.6 Sonnet', input: 3.00, output: 15.00 },
-  'claude-opus': { name: 'Claude 4.8 / 4.7 Opus', input: 15.00, output: 75.00 },
-  'gemini-pro': { name: 'Gemini 3.1 Pro (OpenCode)', input: 2.00, output: 12.00 },
-  'gemini-flash': { name: 'Gemini 3.5 Flash (Antigravity 2.0)', input: 0.075, output: 0.30 },
-  'gpt-5.5': { name: 'GPT 5.5 / 5.4 (Codex)', input: 5.00, output: 30.00 },
-  'local': { name: 'Modelos Locales (Ollama/DeepSeek)', input: 0.00, output: 0.00 }
+  'claude-sonnet': { name: 'Claude 5.5 Sonnet', input: 2.00, output: 10.00 },
+  'claude-opus': { name: 'Claude 5.5 Opus', input: 4.00, output: 20.00 },
+  'claude-haiku': { name: 'Claude 5.5 Haiku', input: 0.10, output: 0.50 },
+  'gemini-hydrogen': { name: 'Gemini 4 Hydrogen (Antigravity)', input: 1.50, output: 7.50 },
+  'gemini-neon': { name: 'Gemini 4 Neon (Antigravity)', input: 3.00, output: 15.00 },
+  'gemini-argon': { name: 'Gemini 4 Argon / Carbon', input: 4.00, output: 20.00 },
+  'gpt-6-sol': { name: 'GPT-6.2 Sol (Codex)', input: 2.00, output: 10.00 },
+  'gpt-6-astra': { name: 'GPT-6.2 Astra', input: 8.00, output: 40.00 },
+  'gpt-6-terra': { name: 'GPT-6.1 Terra', input: 1.00, output: 5.00 },
+  'local': { name: 'Modelos Locales (Ollama/DeepSeek/Llama)', input: 0.00, output: 0.00 }
 };
+
+// Backwards-compatible aliases for legacy flags/configs
+const modelAliases = {
+  'gemini-flash': 'gemini-hydrogen',
+  'gemini-pro': 'gemini-neon',
+  'gpt-5.5': 'gpt-6-sol'
+};
+
+function resolveModelKey(key) {
+  const normalized = (key || '').toLowerCase();
+  return modelAliases[normalized] || normalized;
+}
 
 // Parse active configuration files
 function detectModelFromConfigFile() {
@@ -147,7 +163,7 @@ function detectModelFromConfigFile() {
     try {
       const config = JSON.parse(fs.readFileSync(staffosPath, 'utf8'));
       if (config.model) {
-        const m = config.model.toLowerCase();
+        const m = resolveModelKey(config.model);
         if (modelsPricing[m]) {
           return { key: m, reason: 'configuración de staffos.json especificada' };
         }
@@ -185,44 +201,44 @@ function detectActiveAI() {
 
   // Heuristic 1: Active Runtime Environment Variables (High Priority)
   if (process.env.ANTIGRAVITY_AGENT === '1' || process.env.ANTIGRAVITY_PROJECT_ID) {
-    return { key: 'gemini-flash', reason: 'ejecutando en entorno Antigravity 2.0' };
+    return { key: 'gemini-neon', reason: 'ejecutando en entorno Antigravity 2.0' };
   }
   if (process.env.CODEX === 'true' || process.env.CODEX_AGENT) {
-    return { key: 'gpt-5.5', reason: 'ejecutando en entorno OpenAI Codex' };
+    return { key: 'gpt-6-sol', reason: 'ejecutando en entorno OpenAI Codex' };
   }
   if (process.env.OPENCODE === 'true') {
-    return { key: 'gemini-pro', reason: 'ejecutando en entorno OpenCode' };
+    return { key: 'gemini-neon', reason: 'ejecutando en entorno OpenCode' };
   }
 
   // Heuristic 2: Directory structures (Fallback if no env var is present)
   if (fs.existsSync(path.join(targetDir, '.gemini')) || fs.existsSync(path.join(targetDir, 'adapters/antigravity'))) {
-    return { key: 'gemini-flash', reason: 'directorio de integración de Antigravity 2.0 detectado' };
+    return { key: 'gemini-neon', reason: 'directorio de integración de Antigravity 2.0 detectado' };
   }
   if (fs.existsSync(path.join(targetDir, 'adapters/codex')) || fs.existsSync(path.join(targetDir, 'codex.json'))) {
-    return { key: 'gpt-5.5', reason: 'directorio de integración de Codex detectado' };
+    return { key: 'gpt-6-sol', reason: 'directorio de integración de Codex detectado' };
   }
   if (fs.existsSync(path.join(targetDir, '.opencode')) || fs.existsSync(path.join(targetDir, 'opencode.json')) || fs.existsSync(path.join(targetDir, 'opencode.jsonc'))) {
-    return { key: 'gemini-pro', reason: 'directorio de integración de OpenCode detectado' };
+    return { key: 'gemini-neon', reason: 'directorio de integración de OpenCode detectado' };
   }
   if (fs.existsSync(path.join(targetDir, '.claudecode'))) {
     return { key: 'claude-sonnet', reason: 'directorio .claudecode detectado' };
   }
   if (fs.existsSync(path.join(targetDir, '.cursorrules'))) {
     if (process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
-      return { key: 'gpt-5.5', reason: 'archivo .cursorrules y OPENAI_API_KEY detectados' };
+      return { key: 'gpt-6-sol', reason: 'archivo .cursorrules y OPENAI_API_KEY detectados' };
     }
     return { key: 'claude-sonnet', reason: 'archivo .cursorrules detectado (Cursor default)' };
   }
 
   // Heuristic 3: Env Var keys
   if (process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY) {
-    return { key: 'gemini-pro', reason: 'variable de entorno GEMINI_API_KEY / GOOGLE_API_KEY' };
+    return { key: 'gemini-neon', reason: 'variable de entorno GEMINI_API_KEY / GOOGLE_API_KEY' };
   }
   if (process.env.ANTHROPIC_API_KEY) {
     return { key: 'claude-sonnet', reason: 'variable de entorno ANTHROPIC_API_KEY' };
   }
   if (process.env.OPENAI_API_KEY) {
-    return { key: 'gpt-5.5', reason: 'variable de entorno OPENAI_API_KEY' };
+    return { key: 'gpt-6-sol', reason: 'variable de entorno OPENAI_API_KEY' };
   }
 
   // Heuristic 4: Terminal program
@@ -252,7 +268,8 @@ function getModelSelection() {
 // Estimate token savings for the current workspace
 function runEstimator() {
   const selection = getModelSelection();
-  const pricing = modelsPricing[selection.key] || modelsPricing['claude-sonnet'];
+  const resolvedKey = resolveModelKey(selection.key);
+  const pricing = modelsPricing[resolvedKey] || modelsPricing['claude-sonnet'];
 
   console.log(`${colors.cyan}${colors.bold}=== StaffOS Token & Cost Estimator ===${colors.reset}\n`);
   console.log(`Scanning workspace at: ${colors.gray}${targetDir}${colors.reset}`);
