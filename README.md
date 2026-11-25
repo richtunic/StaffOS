@@ -62,10 +62,13 @@ Una de las mayores ventajas de usar **StaffOS** es el drástico ahorro de tokens
 | **Ciclos de Prueba y Error** | 3 - 5 iteraciones por tarea | 1 iteración (Planificado y validado) | **~75%** |
 | **Costo Estimado por Tarea** | $0.25 - $0.80 USD | $0.02 - $0.06 USD | **~85% - 90%** |
 
-### Tres Estrategias Clave de Ahorro:
-1. **Project Memory Layer (Limitar Lecturas)**: En lugar de escanear el código fuente entero, el agente está obligado a leer primero `AI_CONTEXT.md` y `HANDOFF.md`. Si es suficiente, no lee nada más.
-2. **Minimal Patch Engineering**: Prohíbe reescribir archivos enteros. Al forzar cambios enfocados de pocas líneas, los tokens de salida de la API se reducen al mínimo.
-3. **Progressive Implementation Protocol**: Divide las tareas grandes en fases lógicas con validaciones intermedias obligatorias. Esto evita que el agente falle al final y tenga que repetir toda la tarea desde cero.
+### Estrategias Clave de Ahorro y Continuidad:
+1. **Project Memory Layer (Limitar Lecturas)**: En lugar de escanear el código fuente entero, el agente está obligado a leer primero `AI_CONTEXT.md`, `HANDOFF.md` y `MIGRATIONS.md`. Si es suficiente, no lee nada más.
+2. **Cross-Agent Continuity (Relevo sin pérdida)**: El agente guarda checkpoints continuos en `docs/HANDOFF.md` tras cada avance para que otro agente (Antigravity, Claude Code, Codex, Cursor, OpenCode) pueda retomar el trabajo exactamente donde quedó si se agotan los tokens.
+3. **Database Migrations Tracking (`docs/MIGRATIONS.md`)**: Registra qué migraciones están aplicadas en `Local`, `Test`, `Staging` y cuáles siguen pendientes en `Producción`, evitando confusiones entre bases de datos.
+4. **Minimal Patch Engineering**: Prohíbe reescribir archivos enteros. Al forzar cambios enfocados de pocas líneas, los tokens de salida de la API se reducen al mínimo.
+5. **Progressive Implementation Protocol**: Divide las tareas grandes en fases lógicas con validaciones intermedias obligatorias. Esto evita que el agente falle al final y tenga que repetir toda la tarea desde cero.
+6. **Actualización segura (`npx staffos@latest`)**: Al actualizar StaffOS en un proyecto existente, el CLI actualiza las reglas y comandos sin sobrescribir tus archivos existentes en `docs/`.
 
 ---
 

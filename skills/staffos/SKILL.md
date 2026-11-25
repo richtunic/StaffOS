@@ -274,6 +274,7 @@ docs/DECISIONS.md
 docs/CHANGELOG_AI.md
 docs/TODO.md
 docs/HANDOFF.md
+docs/MIGRATIONS.md
 ```
 
 Antes de escanear todo el proyecto, leer:
@@ -282,8 +283,34 @@ Antes de escanear todo el proyecto, leer:
 2. docs/PROJECT_OVERVIEW.md
 3. docs/HANDOFF.md
 4. docs/DECISIONS.md
+5. docs/MIGRATIONS.md (obligatorio si se toca base de datos o despliegues)
 
 Si esa información es suficiente, no gastar contexto leyendo todo el repositorio.
+
+---
+
+## Cross-Agent Continuity (Persistencia Continua de Progreso)
+
+El progreso **no** debe quedar solo en la memoria de la conversación actual. Si un agente se queda sin tokens (por ejemplo, en Codex) o el usuario cambia de herramienta (Antigravity, Claude Code, Cursor, OpenCode), el siguiente agente debe poder continuar exactamente donde se quedó sin repetir trabajo.
+
+Reglas obligatorias:
+
+* **Checkpoint continuo**: Actualizar `docs/HANDOFF.md` tras cada avance significativo, fase completada o antes de pausar/terminar un turno largo.
+* **Estado explícito**: Registrar siempre el último agente/herramienta, rama o commit base, estado actual (`En progreso`, `Pausada`, `Bloqueada`, `Completada`), qué ya quedó hecho y el **siguiente paso exacto y atómico**.
+* **Cero pérdida de contexto**: Todo archivo modificado, comando pendiente o riesgo detectado debe quedar anotado en `docs/HANDOFF.md` y `docs/CHANGELOG_AI.md`.
+
+---
+
+## Database Migrations Tracking
+
+Nunca adivinar qué migración falta ni preguntar "¿cuál base de datos aplico?" sin revisar el registro oficial del proyecto.
+
+Reglas obligatorias en `docs/MIGRATIONS.md`:
+
+* **Consultar antes de actuar**: Antes de crear, modificar o aplicar migraciones, leer `docs/MIGRATIONS.md`.
+* **Tracking por ambiente**: Registrar explícitamente el estado (`Pendiente`, `Aplicada`, `No aplica`, `Rollback`) para cada ambiente: `Local`, `Test`, `Staging` y `Producción`.
+* **Actualización inmediata**: Si una migración se crea o se aplica en `Test` o `Staging` pero falta en `Producción`, dejarlo marcado de inmediato en `docs/MIGRATIONS.md` y resumido en `docs/HANDOFF.md`.
+* **Visibilidad en relevos**: Cada vez que se actualice `docs/HANDOFF.md`, incluir la lista de migraciones pendientes por aplicar en `Test`, `Staging` y `Producción`.
 
 ---
 
@@ -293,11 +320,12 @@ Actualizar documentación cuando se haga:
 
 * Cambio de arquitectura.
 * Nueva integración.
-* Cambio de base de datos.
+* Cambio de base de datos o migraciones.
 * Cambio de seguridad.
 * Corrección importante.
 * Eliminación de funcionalidad.
 * Decisión técnica relevante.
+* Cualquier avance de fase que pueda requerir relevo entre agentes.
 
 Actualizar como mínimo:
 
@@ -305,6 +333,7 @@ Actualizar como mínimo:
 docs/CHANGELOG_AI.md
 docs/DECISIONS.md
 docs/HANDOFF.md
+docs/MIGRATIONS.md (cuando aplique)
 ```
 
 ---
@@ -336,10 +365,15 @@ Revisión de seguridad:
 - Validación backend:
 - Riesgos pendientes:
 
+Migraciones de DB:
+- Aplicadas en esta sesión:
+- Pendientes (Test / Staging / Producción):
+
 Documentación actualizada:
 - CHANGELOG_AI.md:
 - DECISIONS.md:
 - HANDOFF.md:
+- MIGRATIONS.md:
 
 Siguiente paso recomendado:
 - ...

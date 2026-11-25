@@ -29,13 +29,13 @@ const itemsToCopy = [
   { src: 'skills/staffos/SKILL.md', dest: '.opencode/skills/staffos/SKILL.md' },
   { src: 'commands', dest: 'commands' },
   { src: 'commands', dest: '.opencode/commands' },
-  { src: 'docs', dest: 'docs' }
+  { src: 'docs', dest: 'docs', preserveExisting: true }
 ];
 
 const targetDir = process.cwd();
 
 // Helper to recursively copy directories/files
-function copyRecursiveSync(src, dest) {
+function copyRecursiveSync(src, dest, { preserveExisting = false } = {}) {
   const exists = fs.existsSync(src);
   const stats = exists && fs.statSync(src);
   const isDirectory = exists && stats.isDirectory();
@@ -44,9 +44,17 @@ function copyRecursiveSync(src, dest) {
       fs.mkdirSync(dest, { recursive: true });
     }
     fs.readdirSync(src).forEach((childItemName) => {
-      copyRecursiveSync(path.join(src, childItemName), path.join(dest, childItemName));
+      copyRecursiveSync(
+        path.join(src, childItemName),
+        path.join(dest, childItemName),
+        { preserveExisting }
+      );
     });
   } else {
+    if (preserveExisting && fs.existsSync(dest)) {
+      console.log(`- Kept existing ${path.relative(targetDir, dest)}`);
+      return;
+    }
     const destDir = path.dirname(dest);
     if (!fs.existsSync(destDir)) {
       fs.mkdirSync(destDir, { recursive: true });
@@ -282,7 +290,8 @@ function runEstimator() {
     path.join(targetDir, 'AGENTS.md'),
     path.join(targetDir, 'skills/staffos/SKILL.md'),
     path.join(targetDir, 'docs/AI_CONTEXT.md'),
-    path.join(targetDir, 'docs/HANDOFF.md')
+    path.join(targetDir, 'docs/HANDOFF.md'),
+    path.join(targetDir, 'docs/MIGRATIONS.md')
   ];
   
   let foundDocs = false;
@@ -354,7 +363,7 @@ async function runInstaller() {
       const srcPath = path.join(packageRoot, item.src);
       const destPath = path.join(targetDir, item.dest);
       if (fs.existsSync(srcPath)) {
-        copyRecursiveSync(srcPath, destPath);
+        copyRecursiveSync(srcPath, destPath, { preserveExisting: Boolean(item.preserveExisting) });
       }
     }
     console.log(`\n${colors.green}${colors.bold}StaffOS instalado con éxito! 🎉${colors.reset}`);

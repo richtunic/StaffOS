@@ -8,6 +8,7 @@ Antes de modificar código, leer:
 2. docs/PROJECT_OVERVIEW.md
 3. docs/HANDOFF.md
 4. docs/DECISIONS.md
+5. docs/MIGRATIONS.md (obligatorio si la tarea involucra base de datos o despliegues)
 
 Reglas:
 
@@ -18,6 +19,8 @@ Reglas:
 - No implementar tareas grandes sin fases.
 - No avanzar sin validar.
 - Evitar bucles de error (detenerse y pedir reinicio de chat tras 2 fallos consecutivos).
+- Guardar progreso continuamente en `docs/HANDOFF.md` tras cada avance para relevo entre agentes (Antigravity, Claude Code, Codex, Cursor, OpenCode).
+- Registrar siempre el estado de migraciones por ambiente (Local, Test, Staging, Producción) en `docs/MIGRATIONS.md`.
 - Documentar cambios relevantes.
 
 Usar la skill:

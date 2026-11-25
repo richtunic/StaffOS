@@ -14,7 +14,8 @@ const requiredFiles = [
   "docs/DECISIONS.md",
   "docs/CHANGELOG_AI.md",
   "docs/TODO.md",
-  "docs/HANDOFF.md"
+  "docs/HANDOFF.md",
+  "docs/MIGRATIONS.md"
 ];
 
 for (const file of requiredFiles) {
@@ -31,6 +32,8 @@ const requiredPhrases = [
   "Anti AI Code Slop",
   "Progressive Implementation Protocol",
   "Project Memory Layer",
+  "Cross-Agent Continuity",
+  "Database Migrations Tracking",
   "Context7",
   "Challenge Assumptions"
 ];
