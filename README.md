@@ -9,8 +9,10 @@ Inspirado en la idea de escribir menos código, pero agregando seguridad estrict
 
 ---
 
-## Novedades recientes (v0.3.0)
+## Novedades recientes (v0.4.0)
 
+- **Modern Web Guidance incluida (`skills/modern-web-guidance/SKILL.md`)**: Integra la skill oficial de [GoogleChrome/modern-web-guidance](https://github.com/googlechrome/modern-web-guidance) como paso obligatorio para tareas web (HTML/CSS/JS cliente), reduciendo el AI slop y patrones obsoletos mediante consulta dinámica con `npx -y modern-web-guidance@latest`.
+- **Modelos de IA y tarifas actualizadas**: Soporte y estimación de costos con **Claude 5.5**, **Gemini 4 (Hydrogen, Neon, Argon)** y **GPT-6.2 / 6.1**.
 - **Cross-Agent Continuity (`docs/HANDOFF.md`)**: Guarda checkpoints continuos de progreso (agente anterior, rama/commit, estado, qué funciona y siguiente paso exacto) para que otro agente (**Antigravity**, **Claude Code**, **Codex**, **Cursor**, **OpenCode**) pueda continuar exactamente donde te quedaste si se agotan los tokens.
 - **Database Migrations Tracking (`docs/MIGRATIONS.md`)**: Registro vivo por ambiente (`Local`, `Test`, `Staging`, `Producción`) con estados (`Pendiente`, `Aplicada`, `No aplica`, `Rollback`) para evitar confusiones sobre qué migraciones ya se aplicaron y cuáles faltan en producción.
 - **Actualización segura (`npx staffos@latest`)**: Al actualizar StaffOS en un proyecto existente, el CLI actualiza reglas y comandos y crea los documentos nuevos (como `docs/MIGRATIONS.md`) **sin sobrescribir** tus archivos existentes en `docs/`.

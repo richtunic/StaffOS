@@ -89,6 +89,16 @@ Aplica especialmente a:
 
 ---
 
+## Modern Web Guidance (Obligatorio en Frontend / Web)
+
+Antes de implementar o modificar cualquier interfaz web, HTML, CSS, layout, animaciones o JavaScript del cliente (modales, tablas, formularios, dark mode, accesibilidad, rendimiento, fechas/zonas horarias, sanitización, etc.):
+
+1. Leer y seguir `skills/modern-web-guidance/SKILL.md`.
+2. Consultar primero las guías oficiales actualizadas con `npx -y modern-web-guidance@latest search "<query>"` y `retrieve "<id>"` antes de escribir soluciones ad-hoc o instalar librerías innecesarias.
+3. No aplica a backend puro (SQL, ORMs, API routes), scripts de infra/CI o tooling.
+
+---
+
 ## Anti AI Code Slop
 
 Prohibido:

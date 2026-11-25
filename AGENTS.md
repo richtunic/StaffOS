@@ -23,6 +23,7 @@ Reglas:
 - Registrar siempre el estado de migraciones por ambiente (Local, Test, Staging, Producción) en `docs/MIGRATIONS.md`.
 - Documentar cambios relevantes.
 
-Usar la skill:
+Usar las skills obligatorias:
 
-skills/staffos/SKILL.md
+- `skills/staffos/SKILL.md` (siempre)
+- `skills/modern-web-guidance/SKILL.md` (obligatoria antes de escribir o modificar HTML, CSS, UI o JS del cliente)

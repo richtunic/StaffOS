@@ -3,6 +3,7 @@ import fs from "node:fs";
 const requiredFiles = [
   "AGENTS.md",
   "skills/staffos/SKILL.md",
+  "skills/modern-web-guidance/SKILL.md",
   "commands/staffos-review.md",
   "commands/staffos-audit.md",
   "commands/staffos-security.md",
@@ -34,6 +35,7 @@ const requiredPhrases = [
   "Project Memory Layer",
   "Cross-Agent Continuity",
   "Database Migrations Tracking",
+  "Modern Web Guidance",
   "Context7",
   "Challenge Assumptions"
 ];
