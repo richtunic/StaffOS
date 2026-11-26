@@ -102,7 +102,9 @@ Una de las mayores ventajas de usar **StaffOS** es el drástico ahorro de tokens
 Una vez instalado en tu proyecto local, el agente operará bajo las siguientes directrices:
 
 - **Paso 1**: Leer [`AGENTS.md`](./AGENTS.md) al inicio de la conversación.
-- **Paso 2**: Utilizar la skill en [`skills/staffos/SKILL.md`](./skills/staffos/SKILL.md).
+- **Paso 2**: Utilizar las skills obligatorias incluidas:
+  - [`skills/staffos/SKILL.md`](./skills/staffos/SKILL.md) (reglas de ingeniería, seguridad, ahorro de tokens y relevo continuo).
+  - [`skills/modern-web-guidance/SKILL.md`](./skills/modern-web-guidance/SKILL.md) (basada en [GoogleChrome/modern-web-guidance](https://github.com/googlechrome/modern-web-guidance), obligatoria antes de escribir o modificar HTML, CSS, UI o JS del cliente).
 - **Paso 3**: Mantener actualizados [`docs/HANDOFF.md`](./docs/HANDOFF.md) y [`docs/MIGRATIONS.md`](./docs/MIGRATIONS.md).
 
 ---
